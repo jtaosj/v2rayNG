@@ -29,6 +29,9 @@ data class ProfileItem(
     var host: String? = null,
     var path: String? = null,
     var seed: String? = null,
+    var kcpMtu: Int? = null,
+    var kcpTti: Int? = null,
+
     var quicSecurity: String? = null,
     var quicKey: String? = null,
     var mode: String? = null,
@@ -43,7 +46,6 @@ data class ProfileItem(
     var fingerPrint: String? = null,
     var insecure: Boolean? = null,
     var echConfigList: String? = null,
-    var echForceQuery: String? = null,
     var pinnedCA256: String? = null,
 
     var publicKey: String? = null,
@@ -102,6 +104,8 @@ data class ProfileItem(
                 && this.host == obj.host
                 && this.path == obj.path
                 && this.seed == obj.seed
+                && this.kcpMtu == obj.kcpMtu
+                && this.kcpTti == obj.kcpTti
                 && this.quicSecurity == obj.quicSecurity
                 && this.quicKey == obj.quicKey
                 && this.mode == obj.mode

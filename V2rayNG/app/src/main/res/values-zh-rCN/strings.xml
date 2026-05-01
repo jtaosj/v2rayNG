@@ -88,6 +88,8 @@
     <string name="server_lab_reserved">Reserved (可选，逗号隔开)</string>
     <string name="server_lab_local_address">本地地址 (可选 IPv4/IPv6，逗号隔开)</string>
     <string name="server_lab_local_mtu">Mtu (可选, 默认 1420)</string>
+    <string name="server_lab_kcp_mtu">mKCP MTU (可选, 默认 1350)</string>
+    <string name="server_lab_kcp_tti">mKCP TTI (可选, 默认 50)</string>
     <string name="toast_success">成功</string>
     <string name="toast_failure">失败</string>
     <string name="toast_none_data">没有数据</string>
@@ -114,7 +116,6 @@
     <string name="server_lab_xhttp_extra">XHTTP Extra 原始 JSON，格式： { XHTTPObject }</string>
     <string name="server_lab_final_mask">FinalMask 原始 JSON 格式: { FinalMaskObject }</string>
     <string name="server_lab_ech_config_list">EchConfigList</string>
-    <string name="server_lab_ech_force_query">EchForceQuery</string>
     <string name="server_lab_pinned_ca256">证书指纹 (SHA-256)</string>
 
     <!-- UserAssetActivity -->
@@ -218,6 +219,10 @@
     <string name="summary_pref_allow_insecure">传输层安全选 tls 时，默认跳过证书验证 (allowInsecure)</string>
 
      <string name="title_pref_socks_port">本地代理端口</string>
+    <string name="title_pref_enable_local_proxy">启用本地代理</string>
+    <string name="summary_pref_enable_local_proxy">不开启时没有 socks 代理，无法通过代理更新订阅等</string>
+    <string name="title_pref_socks_enable_udp">SOCKS5 UDP</string>
+    <string name="summary_pref_socks_enable_udp">使用 UDP 时，socks5 认证并不完全安全</string>
      <string name="summary_pref_socks_port">本地代理端口</string>
      <string name="title_pref_dynamic_socks_port">启用动态本地代理端口</string>
      <string name="summary_pref_dynamic_socks_port">每次生成 inbound 时随机生成一个本地代理端口</string>
@@ -293,6 +298,7 @@
     <string name="sub_setting_pre_profile">前置代理配置别名</string>
     <string name="sub_setting_next_profile">落地代理配置別名</string>
     <string name="sub_setting_pre_profile_tip">请确保配置别名存在并唯一</string>
+    <string name="toast_invalid_update_interval">更新间隔无效，最小值为 15 分钟。</string>
     <string name="title_sub_update">更新订阅</string>
     <string name="title_ping_all_server">测试配置 Tcping</string>
     <string name="title_real_ping_all_server">测试配置真连接</string>
