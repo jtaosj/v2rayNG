@@ -222,7 +222,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             MessageUtil.sendMsg2TestService(
                 getApplication(),
                 TestServiceMessage(
-                    key = AppConfig.MSG_MEASURE_CONFIG,
+                    key = AppConfig.MSG_MEASURE_CONFIG_START,
                     subscriptionId = subscriptionId,
                     serverGuids = if (keywordFilter.isNotEmpty()) serversCache.map { it.guid } else emptyList()
                 )
@@ -457,7 +457,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_STATE_START_FAILURE -> {
-                    getApplication<AngApplication>().toastError(R.string.toast_services_failure)
+                    val errorMessage = intent.getStringExtra("content")
+                    if (!errorMessage.isNullOrBlank()) {
+                        getApplication<AngApplication>().toastError(errorMessage)
+                    } else {
+                        getApplication<AngApplication>().toastError(R.string.toast_services_failure)
+                    }
                     isRunning.value = false
                 }
 
@@ -470,9 +475,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
-                    val resultPair = intent.serializable<Pair<String, Long>>("content") ?: return
-                    MmkvManager.encodeServerTestDelayMillis(resultPair.first, resultPair.second)
-                    updateListAction.value = getPosition(resultPair.first)
+                    val content = intent.getStringExtra("content")
+                    updateListAction.value = getPosition(content?: "")
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
