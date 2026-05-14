@@ -8,14 +8,14 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import com.v2ray.ang.R
 import com.v2ray.ang.databinding.ActivityServerGroupBinding
-import com.v2ray.ang.dto.ProfileItem
+import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.extension.isNotNullEmpty
 import com.v2ray.ang.extension.toast
 import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.util.Utils
 import com.v2ray.ang.handler.SettingsChangeManager
+import com.v2ray.ang.util.Utils
 
 class ServerGroupActivity : BaseActivity() {
     private val binding by lazy { ActivityServerGroupBinding.inflate(layoutInflater) }
