@@ -55,7 +55,6 @@ object AppConfig {
     const val PREF_IPV6_ENABLED = "pref_ipv6_enabled"
     const val PREF_PREFER_IPV6 = "pref_prefer_ipv6"
     const val PREF_PROXY_SHARING = "pref_proxy_sharing_enabled"
-    const val PREF_ALLOW_INSECURE = "pref_allow_insecure"
     const val PREF_ENABLE_LOCAL_PROXY = "pref_enable_local_proxy"
     const val PREF_SOCKS_PORT = "pref_socks_port"
     const val PREF_DYNAMIC_SOCKS_PORT = "pref_dynamic_socks_port"
@@ -105,7 +104,8 @@ object AppConfig {
     const val TAG_FRAGMENT = "fragment"
     const val TAG_DNS = "dns-module"
     const val TAG_DOMESTIC_DNS = "domestic-dns"
-    const val TAG_BALANCER = "proxy-round"
+    const val TAG_BALANCER = "balancer-main"
+    const val TAG_BALANCER_PRE = "balancer"
 
     /** Network-related constants. */
     const val UPLINK = "uplink"
