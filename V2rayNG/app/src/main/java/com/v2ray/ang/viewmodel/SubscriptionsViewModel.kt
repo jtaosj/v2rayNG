@@ -1,21 +1,30 @@
 package com.v2ray.ang.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import com.v2ray.ang.R
 import com.v2ray.ang.dto.entities.SubscriptionCache
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.handler.SubscriptionUpdater
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class SubscriptionsViewModel : ViewModel() {
+class SubscriptionsViewModel(application: Application) : BaseViewModel(application) {
     private val subscriptions: MutableList<SubscriptionCache> =
         MmkvManager.decodeSubscriptions().toMutableList()
+
+    private val _subsFlow = MutableStateFlow<List<SubscriptionCache>>(subscriptions.toList())
+    val subsFlow: StateFlow<List<SubscriptionCache>> = _subsFlow.asStateFlow()
 
     fun getAll(): List<SubscriptionCache> = subscriptions.toList()
 
     fun reload() {
         subscriptions.clear()
         subscriptions.addAll(MmkvManager.decodeSubscriptions())
+        _subsFlow.value = subscriptions.toList()
     }
 
     fun remove(subId: String): Boolean {
@@ -24,6 +33,7 @@ class SubscriptionsViewModel : ViewModel() {
             SettingsManager.removeSubscriptionWithDefault(subId)
             SettingsChangeManager.makeSetupGroupTab()
         }
+        _subsFlow.value = subscriptions.toList()
         return changed
     }
 
@@ -33,6 +43,7 @@ class SubscriptionsViewModel : ViewModel() {
             subscriptions[idx] = SubscriptionCache(subId, item)
             MmkvManager.encodeSubscription(subId, item)
         }
+        _subsFlow.value = subscriptions.toList()
     }
 
     fun swap(fromPosition: Int, toPosition: Int) {
@@ -41,7 +52,14 @@ class SubscriptionsViewModel : ViewModel() {
             subscriptions.add(toPosition, item)
             SettingsManager.swapSubscriptions(fromPosition, toPosition)
             SettingsChangeManager.makeSetupGroupTab()
+            _subsFlow.value = subscriptions.toList()
         }
     }
-}
 
+    fun updateSubscriptions() {
+        SettingsChangeManager.makeSetupGroupTab()
+        SubscriptionUpdater.updateAllByManual(app)
+
+        toast(R.string.subscription_updater_job_tips)
+    }
+}
