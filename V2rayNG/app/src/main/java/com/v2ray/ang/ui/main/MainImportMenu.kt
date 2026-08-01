@@ -1,93 +1,103 @@
 package com.v2ray.ang.ui.main
 
-import android.graphics.Bitmap
+import androidx.annotation.StringRes
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.v2ray.ang.R
-import com.v2ray.ang.compose.QRCodeDialog
-import com.v2ray.ang.compose.SelectListDialog
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.extension.isComplexType
+import com.v2ray.ang.ui.compose.SelectListDialog
+
+internal enum class ServerMenuAction(
+    @StringRes val labelRes: Int,
+    val isShareAction: Boolean,
+    val supportsComplexProfiles: Boolean,
+) {
+    ShareQRCode(R.string.share_method_qrcode, isShareAction = true, supportsComplexProfiles = false),
+    ShareClipboard(R.string.share_method_clipboard, isShareAction = true, supportsComplexProfiles = false),
+    ShareFullContent(R.string.share_method_full_content, isShareAction = true, supportsComplexProfiles = true),
+    Edit(R.string.action_edit, isShareAction = false, supportsComplexProfiles = true),
+    Delete(R.string.action_delete, isShareAction = false, supportsComplexProfiles = true),
+}
+
+internal fun serverMenuActions(
+    isComplexProfile: Boolean,
+    includeManagementActions: Boolean,
+): List<ServerMenuAction> = ServerMenuAction.entries.filter { action ->
+    (includeManagementActions || action.isShareAction) && (!isComplexProfile || action.supportsComplexProfiles)
+}
 
 @Composable
 fun ImportMenuContent(
-    onImportQRcode: () -> Unit,
-    onImportClipboard: () -> Unit,
-    onImportLocal: () -> Unit,
-    onImportManually: (Int) -> Unit
+    onAction: (MainAction) -> Unit
 ) {
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_qrcode)) },
-        onClick = onImportQRcode
+        onClick = { onAction(MainAction.ImportQRcode) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_clipboard)) },
-        onClick = onImportClipboard
+        onClick = { onAction(MainAction.ImportClipboard) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_local)) },
-        onClick = onImportLocal
+        onClick = { onAction(MainAction.ImportConfigLocal) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_policy_group)) },
-        onClick = { onImportManually(EConfigType.POLICYGROUP.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.POLICYGROUP.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_proxy_chain)) },
-        onClick = { onImportManually(EConfigType.PROXYCHAIN.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.PROXYCHAIN.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_vmess)) },
-        onClick = { onImportManually(EConfigType.VMESS.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.VMESS.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_vless)) },
-        onClick = { onImportManually(EConfigType.VLESS.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.VLESS.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_ss)) },
-        onClick = { onImportManually(EConfigType.SHADOWSOCKS.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.SHADOWSOCKS.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_socks)) },
-        onClick = { onImportManually(EConfigType.SOCKS.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.SOCKS.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_http)) },
-        onClick = { onImportManually(EConfigType.HTTP.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.HTTP.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_trojan)) },
-        onClick = { onImportManually(EConfigType.TROJAN.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.TROJAN.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_wireguard)) },
-        onClick = { onImportManually(EConfigType.WIREGUARD.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.WIREGUARD.value)) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.menu_item_import_config_manually_hysteria2)) },
-        onClick = { onImportManually(EConfigType.HYSTERIA2.value) }
+        onClick = { onAction(MainAction.ImportManually(EConfigType.HYSTERIA2.value)) }
     )
 }
 
 @Composable
 fun MoreMenuContent(
-    onRestartService: () -> Unit,
+    onAction: (MainAction) -> Unit,
     onDelAllConfig: () -> Unit,
     onDelDuplicateConfig: () -> Unit,
-    onDelInvalidConfig: () -> Unit,
-    onExportAll: () -> Unit,
-    onRealPingAll: () -> Unit,
-    onLocateSelectedServer: () -> Unit,
-    onSortByTestResults: () -> Unit,
-    onSubUpdate: () -> Unit
+    onDelInvalidConfig: () -> Unit
 ) {
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_service_restart)) },
-        onClick = onRestartService
+        onClick = { onAction(MainAction.RestartService) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_del_all_config)) },
@@ -103,23 +113,27 @@ fun MoreMenuContent(
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_export_all)) },
-        onClick = onExportAll
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.title_real_ping_all_server)) },
-        onClick = onRealPingAll
+        onClick = { onAction(MainAction.ExportAll) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_locate_selected_config)) },
-        onClick = onLocateSelectedServer
+        onClick = { onAction(MainAction.LocateSelectedServer) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_sort_by_test_results)) },
-        onClick = onSortByTestResults
+        onClick = { onAction(MainAction.SortByTestResults) }
+    )
+    DropdownMenuItem(
+        text = { Text(stringResource(R.string.title_ping_all_server)) },
+        onClick = { onAction(MainAction.TestAllServers) }
+    )
+    DropdownMenuItem(
+        text = { Text(stringResource(R.string.title_real_ping_all_server)) },
+        onClick = { onAction(MainAction.TestRealAllServers) }
     )
     DropdownMenuItem(
         text = { Text(stringResource(R.string.title_sub_update)) },
-        onClick = onSubUpdate
+        onClick = { onAction(MainAction.UpdateSubscriptions) }
     )
 }
 
@@ -128,34 +142,24 @@ fun ShareMethodDialog(
     guid: String,
     profile: ProfileItem,
     more: Boolean,
-    shareMethodEntries: List<String>,
-    shareMethodMoreEntries: List<String>,
     onDismiss: () -> Unit,
-    onShareQRCode: (String) -> Bitmap?,
-    onShareClipboard: (String) -> Boolean,
-    onShareFullContent: (String) -> Unit,
-    onEditServer: (String, ProfileItem) -> Unit,
-    onRemoveServer: (String) -> Unit,
-    showQRCodeBitmap: (Bitmap?) -> Unit
+    onAction: (MainAction) -> Unit,
+    onRemove: (String) -> Unit,
 ) {
-    val isCustom = profile.configType.isComplexType()
-    val (shareOptions, skip) = if (more) {
-        val options = if (isCustom) shareMethodMoreEntries.takeLast(3) else shareMethodMoreEntries
-        options to if (isCustom) 2 else 0
-    } else {
-        val options = if (isCustom) shareMethodEntries.takeLast(1) else shareMethodEntries
-        options to if (isCustom) 2 else 0
-    }
+    val menuActions = serverMenuActions(
+        isComplexProfile = profile.configType.isComplexType(),
+        includeManagementActions = more,
+    )
     SelectListDialog(
-        options = shareOptions,
+        options = menuActions.map { stringResource(it.labelRes) },
         onSelected = { index, _ ->
             onDismiss()
-            when (index + skip) {
-                0 -> showQRCodeBitmap(onShareQRCode(guid))
-                1 -> onShareClipboard(guid)
-                2 -> onShareFullContent(guid)
-                3 -> onEditServer(guid, profile)
-                4 -> onRemoveServer(guid)
+            when (menuActions[index]) {
+                ServerMenuAction.ShareQRCode -> onAction(MainAction.ShareQRCode(guid))
+                ServerMenuAction.ShareClipboard -> onAction(MainAction.ShareClipboard(guid))
+                ServerMenuAction.ShareFullContent -> onAction(MainAction.ShareFullContent(guid))
+                ServerMenuAction.Edit -> onAction(MainAction.EditServer(guid, profile))
+                ServerMenuAction.Delete -> onRemove(guid)
             }
         },
         onDismiss = onDismiss

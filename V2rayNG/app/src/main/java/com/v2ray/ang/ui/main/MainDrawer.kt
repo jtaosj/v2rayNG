@@ -34,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.v2ray.ang.R
-import com.v2ray.ang.compose.AppDivider
-import com.v2ray.ang.compose.verticalScrollbar
+import com.v2ray.ang.ui.compose.AppDivider
+import com.v2ray.ang.ui.compose.verticalScrollbar
 
 @Composable
 fun MainDrawerContent(onNavigate: (String) -> Unit) {
@@ -53,9 +53,11 @@ fun MainDrawerContent(onNavigate: (String) -> Unit) {
                 .verticalScrollbar(drawerScrollState)
                 .padding(bottom = 80.dp)
         ) {
-            Surface(modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp)) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -83,7 +85,7 @@ fun MainDrawerContent(onNavigate: (String) -> Unit) {
                 ),
                 onNavigate = onNavigate
             )
-            AppDivider(modifier = Modifier.padding(vertical = 4.dp))
+            AppDivider()
             DrawerMenuGroup(
                 items = listOf(
                     DrawerMenuItemData(R.drawable.ic_promotion_24dp, R.string.title_pref_promotion, "promotion"),

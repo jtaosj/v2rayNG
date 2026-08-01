@@ -1,14 +1,13 @@
 package com.v2ray.ang.ui.main
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
@@ -29,10 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.v2ray.ang.compose.LocalDarkTheme
-import com.v2ray.ang.compose.QRCodeDialog
 import com.v2ray.ang.dto.entities.ProfileItem
-import com.v2ray.ang.viewmodel.MainViewModel
+import com.v2ray.ang.ui.compose.LocalDarkTheme
+import com.v2ray.ang.ui.compose.QRCodeDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -41,31 +39,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     mainViewModel: MainViewModel,
-    onFabClick: () -> Unit,
-    onTestClick: () -> Unit,
+    onAction: (MainAction) -> Unit,
     onNavigate: (String) -> Unit,
-    onImportManually: (Int) -> Unit,
-    onImportQRcode: () -> Unit,
-    onImportClipboard: () -> Unit,
-    onImportLocal: () -> Unit,
-    onSubUpdate: () -> Unit,
-    onExportAll: () -> Unit,
-    onRealPingAll: () -> Unit,
-    onRestartService: () -> Unit,
-    onDelAllConfig: () -> Unit,
-    onDelDuplicateConfig: () -> Unit,
-    onDelInvalidConfig: () -> Unit,
-    onSortByTestResults: () -> Unit,
-    onEditServer: (String, ProfileItem) -> Unit,
-    onRemoveServer: (String) -> Unit,
-    onSelectServer: (String) -> Unit,
-    onShareQRCode: (String) -> Bitmap?,
-    onShareClipboard: (String) -> Boolean,
-    onShareFullContent: (String) -> Unit,
-    onSubscriptionIdChanged: (String) -> Unit,
-    onLocateSelectedServer: () -> Unit,
-    shareMethodEntries: List<String>,
-    shareMethodMoreEntries: List<String>
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val groups = uiState.groups
@@ -75,6 +50,7 @@ fun MainScreen(
     val selectedGuid = uiState.selectedGuid
     val doubleColumnDisplay = uiState.doubleColumnDisplay
     val confirmRemove = uiState.confirmRemove
+    val shareQRCodeBitmap = uiState.shareQRCodeBitmap
 
     val isDarkTheme = LocalDarkTheme.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -87,7 +63,9 @@ fun MainScreen(
     var showRemoveConfirm by remember { mutableStateOf<String?>(null) }
 
     var shareTarget by remember { mutableStateOf<Triple<String, ProfileItem, Boolean>?>(null) }
-    var showQRCodeBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val removeServer: (String) -> Unit = { guid ->
+        if (confirmRemove) showRemoveConfirm = guid else onAction(MainAction.RemoveServer(guid))
+    }
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -125,7 +103,7 @@ fun MainScreen(
             .collect { page ->
                 val currentGroups = latestGroups
                 if (!latestLocateInProgress && page in currentGroups.indices) {
-                    onSubscriptionIdChanged(currentGroups[page].id)
+                    onAction(MainAction.SelectGroup(currentGroups[page].id))
                 }
             }
     }
@@ -145,7 +123,7 @@ fun MainScreen(
                     animateAdjacentPage = false
                 )
             }
-            onSubscriptionIdChanged(target.groupId)
+            onAction(MainAction.SelectGroup(target.groupId))
 
             repeat(10) {
                 val ready = if (latestDoubleColumnDisplay) {
@@ -182,16 +160,16 @@ fun MainScreen(
     MainDialogs(
         showDelAllConfirm = showDelAllConfirm,
         onDismissDelAll = { showDelAllConfirm = false },
-        onConfirmDelAll = { showDelAllConfirm = false; onDelAllConfig() },
+        onConfirmDelAll = { showDelAllConfirm = false; onAction(MainAction.RemoveAllServers) },
         showDelDuplicateConfirm = showDelDuplicateConfirm,
         onDismissDelDuplicate = { showDelDuplicateConfirm = false },
-        onConfirmDelDuplicate = { showDelDuplicateConfirm = false; onDelDuplicateConfig() },
+        onConfirmDelDuplicate = { showDelDuplicateConfirm = false; onAction(MainAction.RemoveDuplicateServers) },
         showDelInvalidConfirm = showDelInvalidConfirm,
         onDismissDelInvalid = { showDelInvalidConfirm = false },
-        onConfirmDelInvalid = { showDelInvalidConfirm = false; onDelInvalidConfig() },
+        onConfirmDelInvalid = { showDelInvalidConfirm = false; onAction(MainAction.RemoveInvalidServers) },
         showRemoveConfirm = showRemoveConfirm,
         onDismissRemove = { showRemoveConfirm = null },
-        onConfirmRemove = { guid -> showRemoveConfirm = null; onRemoveServer(guid) }
+        onConfirmRemove = { guid -> showRemoveConfirm = null; onAction(MainAction.RemoveServer(guid)) }
     )
 
     if (shareTarget != null) {
@@ -200,19 +178,13 @@ fun MainScreen(
             guid = guid,
             profile = profile,
             more = more,
-            shareMethodEntries = shareMethodEntries,
-            shareMethodMoreEntries = shareMethodMoreEntries,
             onDismiss = { shareTarget = null },
-            onShareQRCode = onShareQRCode,
-            onShareClipboard = onShareClipboard,
-            onShareFullContent = onShareFullContent,
-            onEditServer = onEditServer,
-            onRemoveServer = onRemoveServer,
-            showQRCodeBitmap = { bitmap -> showQRCodeBitmap = bitmap }
+            onAction = onAction,
+            onRemove = removeServer,
         )
     }
-    if (showQRCodeBitmap != null) {
-        QRCodeDialog(bitmap = showQRCodeBitmap, onDismiss = { showQRCodeBitmap = null })
+    if (shareQRCodeBitmap != null) {
+        QRCodeDialog(bitmap = shareQRCodeBitmap, onDismiss = { onAction(MainAction.DismissQRCodeDialog) })
     }
 
     ModalNavigationDrawer(
@@ -235,28 +207,19 @@ fun MainScreen(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { query: String ->
                         searchQuery = query
-                        mainViewModel.filterConfig(query)
+                        onAction(MainAction.Search(query))
                     },
                     onSearchClose = {
                         searchQuery = ""
-                        mainViewModel.filterConfig("")
+                        onAction(MainAction.Search(""))
                         showSearch = false
                     },
                     onSearchToggle = { show: Boolean -> showSearch = show },
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onImportQRcode = onImportQRcode,
-                    onImportClipboard = onImportClipboard,
-                    onImportLocal = onImportLocal,
-                    onImportManually = onImportManually,
-                    onRestartService = onRestartService,
+                    onAction = onAction,
                     onDelAllConfig = { showDelAllConfirm = true },
                     onDelDuplicateConfig = { showDelDuplicateConfirm = true },
-                    onDelInvalidConfig = { showDelInvalidConfirm = true },
-                    onExportAll = onExportAll,
-                    onRealPingAll = onRealPingAll,
-                    onLocateSelectedServer = onLocateSelectedServer,
-                    onSortByTestResults = onSortByTestResults,
-                    onSubUpdate = onSubUpdate
+                    onDelInvalidConfig = { showDelInvalidConfirm = true }
                 )
             },
             bottomBar = {
@@ -264,8 +227,7 @@ fun MainScreen(
                     displayText = displayText,
                     isRunning = isRunning,
                     isDarkTheme = isDarkTheme,
-                    onTestClick = onTestClick,
-                    onFabClick = onFabClick
+                    onAction = onAction
                 )
             },
             floatingActionButton = {},
@@ -312,18 +274,15 @@ fun MainScreen(
                             searchQuery = searchQuery,
                             lazyListStates = lazyListStates,
                             lazyGridStates = lazyGridStates,
-                            onSelectServer = onSelectServer,
-                            onEditServer = onEditServer,
+                            onSelectServer = { guid -> onAction(MainAction.SelectServer(guid)) },
+                            onEditServer = { guid, profile -> onAction(MainAction.EditServer(guid, profile)) },
                             onShareServer = { guid, profile ->
                                 shareTarget = Triple(guid, profile, false)
                             },
                             onMoreServer = { guid, profile ->
                                 shareTarget = Triple(guid, profile, true)
                             },
-                            onRemoveServer = { guid ->
-                                if (confirmRemove) showRemoveConfirm = guid
-                                else onRemoveServer(guid)
-                            },
+                            onRemoveServer = removeServer,
                             contentPadding = PaddingValues(
                                 start = 0.dp,
                                 top = 0.dp,
