@@ -49,7 +49,6 @@ import com.v2ray.ang.ui.compose.AppDropdownMenuItems
 import com.v2ray.ang.ui.compose.AppListItem
 import com.v2ray.ang.ui.compose.AppTopBar
 import com.v2ray.ang.ui.compose.ItemDivider
-import com.v2ray.ang.ui.compose.colorFabActive
 import com.v2ray.ang.ui.compose.verticalScrollbar
 import com.v2ray.ang.util.Utils
 
@@ -160,7 +159,7 @@ fun PerAppProxyScreen(
                         IconButton(onClick = { showSearch = true }) {
                             Icon(
                                 painterResource(R.drawable.ic_search_24dp),
-                                contentDescription = stringResource(R.string.menu_item_search)
+                                contentDescription = stringResource(R.string.acc_search)
                             )
                         }
                     }
@@ -224,7 +223,7 @@ fun PerAppProxyScreen(
                             onCheckedChange = onPerAppProxyChanged,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                                checkedTrackColor = colorFabActive
+                                checkedTrackColor = MaterialTheme.colorScheme.secondary
                             )
                         )
                     }
@@ -245,14 +244,14 @@ fun PerAppProxyScreen(
                             onCheckedChange = onBypassAppsChanged,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
-                                checkedTrackColor = colorFabActive
+                                checkedTrackColor = MaterialTheme.colorScheme.secondary
                             )
                         )
                     }
                     IconButton(onClick = onInfoClick) {
                         Icon(
                             painter = painterResource(R.drawable.ic_about_24dp),
-                            contentDescription = stringResource(R.string.summary_pref_per_app_proxy),
+                            contentDescription = stringResource(R.string.acc_per_app_proxy_information),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

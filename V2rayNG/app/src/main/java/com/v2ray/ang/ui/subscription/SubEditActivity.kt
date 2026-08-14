@@ -173,11 +173,11 @@ fun SubEditScreen(
                         IconButton(onClick = {
                             if (confirmRemove) showDeleteConfirm = true else onDelete()
                         }) {
-                            Icon(painterResource(R.drawable.ic_delete_24dp), contentDescription = stringResource(R.string.menu_item_del_config))
+                            Icon(painterResource(R.drawable.ic_delete_24dp), contentDescription = stringResource(R.string.acc_delete))
                         }
                     }
                     IconButton(onClick = { buildSubItem()?.let { onSave(it) } }) {
-                        Icon(painterResource(R.drawable.ic_fab_check), contentDescription = stringResource(R.string.menu_item_save_config))
+                        Icon(painterResource(R.drawable.ic_fab_check), contentDescription = stringResource(R.string.acc_save))
                     }
                 }
             )
@@ -227,7 +227,8 @@ fun SubEditScreen(
                 value = prevProfile,
                 options = profileSuggestions,
                 onValueChange = { prevProfile = it },
-                editable = true
+                editable = true,
+                supportingText = stringResource(R.string.sub_setting_entry_proxy_tip)
             )
             FormDropdownField(
                 label = stringResource(R.string.sub_setting_next_profile),
@@ -235,7 +236,8 @@ fun SubEditScreen(
                 value = nextProfile,
                 options = profileSuggestions,
                 onValueChange = { nextProfile = it },
-                editable = true
+                editable = true,
+                supportingText = stringResource(R.string.sub_setting_exit_proxy_tip)
             )
         }
     }

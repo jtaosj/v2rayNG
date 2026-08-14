@@ -37,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.R
-import com.v2ray.ang.extension.toast
+import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.ui.base.BaseComponentActivity
 import com.v2ray.ang.ui.compose.AppTopBar
 import com.v2ray.ang.ui.compose.ItemDivider
 import com.v2ray.ang.ui.compose.verticalScrollbar
+import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -91,8 +93,9 @@ class LogcatActivity : BaseComponentActivity() {
 
                 uri to logFile.name
             } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "Failed to share Logcat", e)
                 withContext(Dispatchers.Main) {
-                    toast(e.localizedMessage ?: e.toString())
+                    toastError(R.string.toast_failure)
                 }
                 return@launch
             }
@@ -159,20 +162,20 @@ fun LogcatScreen(
                         IconButton(onClick = { showSearch = true }) {
                             Icon(
                                 painterResource(R.drawable.ic_search_24dp),
-                                contentDescription = "filter"
+                                contentDescription = stringResource(R.string.acc_search)
                             )
                         }
                     }
                     IconButton(onClick = { viewModel.copyLogcat() }) {
                         Icon(
                             painterResource(R.drawable.ic_copy),
-                            contentDescription = stringResource(R.string.logcat_copy)
+                            contentDescription = stringResource(R.string.acc_copy_log)
                         )
                     }
                     IconButton(onClick = { onShareLogcat() }) {
                         Icon(
                             painterResource(R.drawable.ic_share_24dp),
-                            contentDescription = stringResource(R.string.logcat_share)
+                            contentDescription = stringResource(R.string.acc_share_log)
                         )
                     }
                     IconButton(onClick = {
@@ -180,7 +183,7 @@ fun LogcatScreen(
                     }) {
                         Icon(
                             painterResource(R.drawable.ic_delete_24dp),
-                            contentDescription = stringResource(R.string.logcat_clear)
+                            contentDescription = stringResource(R.string.acc_clear_log)
                         )
                     }
                 }
@@ -192,7 +195,7 @@ fun LogcatScreen(
             }) {
                 Icon(
                     painterResource(R.drawable.ic_restore_24dp),
-                    contentDescription = stringResource(R.string.pull_down_to_refresh)
+                    contentDescription = stringResource(R.string.acc_refresh)
                 )
             }
         }
