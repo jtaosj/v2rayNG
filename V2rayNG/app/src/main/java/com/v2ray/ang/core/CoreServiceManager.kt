@@ -1,5 +1,6 @@
 package com.v2ray.ang.core
 
+import android.app.Activity
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -30,6 +31,7 @@ import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import com.v2ray.ang.extension.delay
 import kotlinx.coroutines.launch
 import libv2ray.CoreCallbackHandler
 import libv2ray.CoreController
@@ -371,6 +373,7 @@ object CoreServiceManager {
          * @return 0 for success, any other value for failure.
          */
         override fun startup(): Long {
+            LogUtil.i(AppConfig.TAG, "StartCore-Manager: CoreCallback startup")
             return 0
         }
 
@@ -379,14 +382,8 @@ object CoreServiceManager {
          * @return 0 for success, any other value for failure.
          */
         override fun shutdown(): Long {
-            val serviceControl = serviceControl?.get() ?: return -1
-            return try {
-                serviceControl.stopService()
-                0
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "StartCore-Manager: Failed to stop service", e)
-                -1
-            }
+            LogUtil.i(AppConfig.TAG, "StartCore-Manager: CoreCallback shutdown")
+            return 0
         }
 
         /**
@@ -396,6 +393,7 @@ object CoreServiceManager {
          * @return Always returns 0.
          */
         override fun onEmitStatus(l: Long, s: String?): Long {
+            LogUtil.i(AppConfig.TAG, "StartCore-Manager: CoreCallback onEmitStatus $s")
             return 0
         }
     }
@@ -474,9 +472,20 @@ object CoreServiceManager {
 
                 AppConfig.MSG_STATE_RESTART -> {
                     LogUtil.i(AppConfig.TAG, "StartCore-Manager: Restart service")
-                    serviceControl.stopService()
-                    Thread.sleep(500L)
-                    LauncherManager.startService(serviceControl.getService())
+                    // The UI and daemon run in separate processes, so acknowledge the active
+                    // daemon before stopping it instead of relying on possibly stale UI state.
+                    if (isOrderedBroadcast) resultCode = Activity.RESULT_OK
+
+                    val pendingResult = goAsync()
+                    CoroutineScope(Dispatchers.Default).launch {
+                        try {
+                            serviceControl.stopService()
+                            delay(500L)
+                            LauncherManager.startService(serviceControl.getService())
+                        } finally {
+                            pendingResult.finish()
+                        }
+                    }
                 }
 
                 AppConfig.MSG_MEASURE_DELAY -> {
